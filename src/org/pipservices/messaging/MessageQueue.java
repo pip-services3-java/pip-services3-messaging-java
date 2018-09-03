@@ -61,7 +61,7 @@ public abstract class MessageQueue
         open(correlationId, connection, credential);
     }
     
-    public abstract boolean isOpened();
+    public abstract boolean isOpen();
     public abstract void open(String correlationId, ConnectionParams connection, CredentialParams credential) 
 		throws ApplicationException;
     public abstract void close(String correlationId) throws ApplicationException;

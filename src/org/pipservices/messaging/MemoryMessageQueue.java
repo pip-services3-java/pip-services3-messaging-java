@@ -33,7 +33,7 @@ public class MemoryMessageQueue extends MessageQueue {
 	}
 
     @Override
-    public boolean isOpened() {
+    public boolean isOpen() {
     	return _opened;
     }
     

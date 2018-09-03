@@ -7,9 +7,9 @@
   <version>3.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>Messaging components for Pip.Services</name>
+  <name>Pip.Services Messaging</name>
   <description>Messaging components for Pip.Services in Java</description>
-  <url>http://www.pipservices.org</url>
+  <url>http://www.github.com/pip-services/pip-services</url>
   
   <licenses>
     <license>
@@ -39,24 +39,6 @@
     <url>https://github.com/pip-services-java/pip-services-messages-java</url>
   </scm>
 
-  <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>9</version>
-  </parent>
-
-  <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <repository>
-      <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
-
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -79,46 +61,34 @@
     <directory>${basedir}/lib</directory>
     <finalName>${project.artifactId}-${project.version}</finalName>
 
-<plugins>
+    <plugins>
       <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-            <source>1.8</source>
-            <target>1.8</target>
-        </configuration>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.3.2</version>
+          <configuration>
+              <source>1.8</source>
+              <target>1.8</target>
+          </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>2.10</version>
-        <executions>
-          <execution>
-            <id>copy-dependencies</id>
-            <phase>package</phase>
-            <goals>
-              <goal>copy-dependencies</goal>
-            </goals>
-            <configuration>
-              <outputDirectory>${basedir}/lib</outputDirectory>
-              <overWriteReleases>false</overWriteReleases>
-              <overWriteSnapshots>false</overWriteSnapshots>
-              <overWriteIfNewer>true</overWriteIfNewer>
-            </configuration>
-          </execution>
-        </executions>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>2.3</version>
+          <configuration>
+              <descriptorRefs>
+                  <descriptorRef>jar-with-dependencies</descriptorRef>
+              </descriptorRefs>
+          </configuration>
+          <executions>
+              <execution>
+                  <phase>package</phase>
+                  <goals>
+                      <goal>single</goal>
+                  </goals>
+              </execution>
+          </executions>
       </plugin>
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.3</version>
-        <extensions>true</extensions>
-        <configuration>
-          <serverId>ossrh</serverId>
-          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
-        </configuration>
-      </plugin>
-<plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
           <version>2.1.2</version>
@@ -134,12 +104,28 @@
       <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>2.10.3</version>
+          <version>3.0.0</version>
           <configuration>
-              <outputDirectory>${basedir}/doc</outputDirectory>
               <reportOutputDirectory>${basedir}/doc</reportOutputDirectory>
               <destDir>api</destDir>
+<!--
+              <quiet>true</quiet>
+              <nonavbar>true</nonavbar>
+              <notree>true</notree>
+              <nocomment>true</nocomment>
+              <nohelp>true</nohelp>
+-->
           </configuration>
+<!--
+          <executions>
+              <execution>
+                  <id>attach-javadocs</id>
+                  <goals>
+                      <goal>jar</goal>
+                  </goals>
+              </execution>
+          </executions>
+-->
       </plugin>
       <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -155,13 +141,39 @@
               </execution>
           </executions>
       </plugin>
-    </plugins>
+      </plugins>
   </build>
+
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>
+
+
+  <distributionManagement>
+    <!-- Repository for snapshots -->
+    <snapshotRepository>
+        <id>sonatype-nexus-snapshots</id>
+        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <!-- Repository for releases -->
+    <repository>
+        <id>nexus-releases</id>
+        <name>Nexus Release Repository</name>
+        <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 
   <dependencies>
     <dependency>
         <groupId>org.pipservices</groupId>
         <artifactId>pip-services-commons</artifactId>
+        <version>3.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+        <groupId>org.pipservices</groupId>
+        <artifactId>pip-services-components</artifactId>
         <version>3.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
