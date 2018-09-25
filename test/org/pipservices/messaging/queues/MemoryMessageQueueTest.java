@@ -1,7 +1,8 @@
-package org.pipservices.messaging;
+package org.pipservices.messaging.queues;
 
 import org.junit.*;
 import org.pipservices.commons.errors.*;
+import org.pipservices.messaging.queues.MemoryMessageQueue;
 
 public class MemoryMessageQueueTest {
 	private MemoryMessageQueue queue;

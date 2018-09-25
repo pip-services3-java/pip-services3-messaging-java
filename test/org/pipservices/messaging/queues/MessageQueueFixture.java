@@ -1,6 +1,10 @@
-package org.pipservices.messaging;
+package org.pipservices.messaging.queues;
 
 import static org.junit.Assert.*;
+
+import org.pipservices.messaging.queues.IMessageQueue;
+import org.pipservices.messaging.queues.IMessageReceiver;
+import org.pipservices.messaging.queues.MessageEnvelop;
 
 public class MessageQueueFixture{
     private IMessageQueue _queue;

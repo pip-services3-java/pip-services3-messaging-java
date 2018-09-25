@@ -1,7 +1,7 @@
-package org.pipservices.build;
+package org.pipservices.messaging.build;
 
 import org.pipservices.components.build.*;
-import org.pipservices.messaging.MemoryMessageQueue;
+import org.pipservices.messaging.queues.MemoryMessageQueue;
 import org.pipservices.commons.refer.*;
 
 public class MemoryMessageQueueFactory extends Factory {

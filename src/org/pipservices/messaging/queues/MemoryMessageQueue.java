@@ -1,4 +1,4 @@
-package org.pipservices.messaging;
+package org.pipservices.messaging.queues;
 
 import java.time.*;
 import java.util.*;
