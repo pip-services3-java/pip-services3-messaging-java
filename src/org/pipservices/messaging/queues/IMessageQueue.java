@@ -118,7 +118,7 @@ public interface IMessageQueue extends IOpenable {
 	void complete(MessageEnvelop message) throws ApplicationException;
 
 	/**
-	 * Returnes message into the queue and makes it available for all subscribers to
+	 * Returns message into the queue and makes it available for all subscribers to
 	 * receive it again. This method is usually used to return a message which could
 	 * not be processed at the moment to repeat the attempt. Messages that cause
 	 * unrecoverable errors shall be removed permanently or/and send to dead letter
@@ -165,7 +165,7 @@ public interface IMessageQueue extends IOpenable {
 	void beginListen(String correlationId, IMessageReceiver receiver);
 
 	/**
-	 * Ends listening for incoming messages. When this method is call [[listen]]
+	 * Ends listening for incoming messages. When this method is call listen()
 	 * unblocks the thread and execution continues.
 	 * 
 	 * @param correlationId (optional) transaction id to trace execution through

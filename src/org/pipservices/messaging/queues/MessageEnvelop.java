@@ -1,11 +1,16 @@
 package org.pipservices.messaging.queues;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
 
+import org.pipservices.commons.convert.JsonConverter;
 import org.pipservices.commons.convert.StringConverter;
 import org.pipservices.commons.data.*;
 
 import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 /**
  * Allows adding additional information to messages. A correlation id, message id, and a message type 
@@ -131,6 +136,24 @@ public class MessageEnvelop {
 		_message = value;
 	}
 
+	/**
+	 * Stores the given string.
+	 * 
+	 * @param message the string to set. Will be converted to a buffer, using UTF-8
+	 *                encoding.
+	 */
+	public void setMessageAsJson(Object message) throws JsonProcessingException {
+		_message = JsonConverter.toJson(message);
+	}
+
+	/**
+	 * @return the value that was stored in this message as a JSON string.
+	 * 
+	 */
+	public <T> T getMessageAsJson(Class<T> type) throws JsonMappingException, JsonParseException, IOException {
+		return JsonConverter.fromJson(type, _message.toString());
+	}
+	
 	/**
 	 * Convert's this MessageEnvelope to a string, using the following format:
 	 * 

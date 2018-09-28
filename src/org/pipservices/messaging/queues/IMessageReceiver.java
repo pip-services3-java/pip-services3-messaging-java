@@ -18,7 +18,6 @@ package org.pipservices.messaging.queues;
  * 
  * messageQueue.open("123");
  * messageQueue.send("123", new MessageEnvelop(null, "mymessage", "ABC")); // Output in console: "ABC"
- * });
  * }
  * </pre>
  */
