@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 /**
  * Allows adding additional information to messages. A correlation id, message id, and a message type 
  * are added to the data being sent/received. Additionally, a MessageEnvelope can reference a lock token.
- * 
+ * <p>
  * Side note: a MessageEnvelope's message is stored as a buffer, so strings are converted 
  * using utf8 conversions.
  */

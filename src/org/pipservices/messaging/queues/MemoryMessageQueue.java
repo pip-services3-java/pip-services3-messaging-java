@@ -8,17 +8,19 @@ import org.pipservices.components.connect.*;
 
 /**
  * Message queue that sends and receives messages within the same process by using shared memory.
- * 
+ * <p>
  * This queue is typically used for testing to mock real queues.
- * 
+ * <p>
  * ### Configuration parameters ###
- * 
- * name:                        name of the message queue
- * 
+ * <ul>
+ * <li>name:                        name of the message queue
+ * </ul>
+ * <p>
  * ### References ###
- * 
- * - *:logger:*:*:1.0           (optional) ILogger components to pass log messages
- * - *:counters:*:*:1.0         (optional) ICounters components to pass collected measurements
+ * <ul>
+ * <li>*:logger:*:*:1.0           (optional) <a href="https://raw.githubusercontent.com/pip-services-java/pip-services-components-java/master/doc/api/org/pipservices/components/log/ILogger.html">ILogger</a> components to pass log messages
+ * <li>*:counters:*:*:1.0         (optional) <a href="https://raw.githubusercontent.com/pip-services-java/pip-services-components-java/master/doc/api/org/pipservices/components/count/ICounters.html">ICounters</a> components to pass collected measurements
+ * </ul>
  * <p>
  * ### Example ###
  * <pre>

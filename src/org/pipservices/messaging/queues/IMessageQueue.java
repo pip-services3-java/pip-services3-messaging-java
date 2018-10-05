@@ -7,10 +7,10 @@ import org.pipservices.commons.run.*;
 
 /**
  * Interface for asynchronous message queues.
- * 
+ * <p>
  * Not all queues may implement all the methods.
  * Attempt to call non-supported method will result in NotImplemented exception.
- * To verify if specific method is supported consult with MessagingCapabilities.
+ * To verify if specific method is supported consult with {@link MessagingCapabilities}.
  * 
  * @see MessageEnvelop
  * @see MessagingCapabilities

@@ -8,7 +8,7 @@ import org.pipservices.commons.refer.*;
  * Creates MemoryMessageQueue components by their descriptors.
  * Name of created message queue is taken from its descriptor.
  * 
- * @see Factory
+ * @see <a href="https://raw.githubusercontent.com/pip-services-java/pip-services-components-java/master/doc/api/org/pipservices/components/build/Factory.html">Factory</a>
  * @see MemoryMessageQueue
  */
 public class DefaultMessagingFactory extends Factory {

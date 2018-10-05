@@ -15,29 +15,35 @@ import org.pipservices.components.log.CompositeLogger;
 
 /**
  * Abstract message queue that is used as a basis for specific message queue implementations.
- * 
+ * <p>
  * ### Configuration parameters ###
- * 
- * name:                        name of the message queue
- * connection(s):
- *   discovery_key:             key to retrieve parameters from discovery service
- *   protocol:                  connection protocol like http, https, tcp, udp
- *   host:                      host name or IP address
- *   port:                      port number
- *   uri:                       resource URI or connection string with all parameters in it
- * credential(s):
- *   store_key:                 key to retrieve parameters from credential store
- *   username:                  user name
- *   password:                  user password
- *   access_id:                 application access id
- *   access_key:                application secret key
- * 
+ * <ul>
+ * <li>name:                        name of the message queue
+ * <li>connection(s):
+ *   <ul>
+ *   <li>discovery_key:             key to retrieve parameters from discovery service
+ *   <li>protocol:                  connection protocol like http, https, tcp, udp
+ *   <li>host:                      host name or IP address
+ *   <li>port:                      port number
+ *   <li>uri:                       resource URI or connection string with all parameters in it
+ *   </ul>
+ * <li>credential(s):
+ *   <ul>
+ *   <li>store_key:                 key to retrieve parameters from credential store
+ *   <li>username:                  user name
+ *   <li>password:                  user password
+ *   <li>access_id:                 application access id
+ *   <li>access_key:                application secret key
+ *   </ul>
+ * </ul>
+ * <p>
  * ### References ###
- * 
- * - *:logger:*:*:1.0           (optional) ILogger components to pass log messages
- * - *:counters:*:*:1.0         (optional) ICounters components to pass collected measurements
- * - *:discovery:*:*:1.0        (optional) IDiscovery components to discover connection(s)
- * - *:credential-store:*:*:1.0 (optional) ICredentialStore componetns to lookup credential(s)
+ * <ul>
+ * <li>*:logger:*:*:1.0         (optional) <a href="https://raw.githubusercontent.com/pip-services-java/pip-services-components-java/master/doc/api/org/pipservices/components/log/ILogger.html">ILogger</a> components to pass log messages
+ * <li>*:counters:*:*:1.0         (optional) <a href="https://raw.githubusercontent.com/pip-services-java/pip-services-components-java/master/doc/api/org/pipservices/components/count/ICounters.html">ICounters</a> components to pass collected measurements
+ * <li>*:discovery:*:*:1.0        (optional) <a href="https://raw.githubusercontent.com/pip-services-java/pip-services-components-java/master/doc/api/org/pipservices/components/connect/IDiscovery.html">IDiscovery</a> services to resolve connection
+ * <li>*:credential-store:*:*:1.0 (optional) <a href="https://raw.githubusercontent.com/pip-services-java/pip-services-components-java/master/doc/api/org/pipservices/components/auth/ICredentialStore.html">ICredentialStore</a> componetns to lookup credential(s)
+ * </ul>
  */
 public abstract class MessageQueue implements IMessageQueue, IReferenceable, IConfigurable, IOpenable, IClosable {
 
