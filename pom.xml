@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.pipservices</groupId>
-  <artifactId>pip-services-messages</artifactId>
+  <artifactId>pip-services-messaging</artifactId>
   <version>3.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
