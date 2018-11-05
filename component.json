@@ -1,5 +1,5 @@
 {
-    "name": "pip-services-messaging",
+    "name": "pip-services3-messaging",
     "registry": "pipdevs",
     "version": "3.0.0",
     "build": "0"
