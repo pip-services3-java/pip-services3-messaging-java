@@ -4,3 +4,6 @@
 /.idea
 /config/config.json
 /data/dummies.json
+genKey
+gpg_public.key
+gpg_private.key
