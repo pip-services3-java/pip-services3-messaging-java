@@ -11,11 +11,11 @@ The module contains the following packages:
 
 <a name="links"></a> Quick links:
 
-* [Configuration](https://www.pipservices.org/recipies/configuration)
+* [Configuration](http://docs.pipservices.org/toolkit/getting_started/configurations/)
 * [API Reference](https://pip-services3-java.github.io/pip-services3-messaging-java/)
 * [Change Log](CHANGELOG.md)
-* [Get Help](https://www.pipservices.org/community/help)
-* [Contribute](https://www.pipservices.org/community/contribute)
+* [Get Help](http://docs.pipservices.org/get_help/)
+* [Contribute](http://docs.pipservices.org/contribute/)
 
 ## Use
 
@@ -24,14 +24,14 @@ Go to the pom.xml file in Maven project and add dependencies::
 <dependency>
   <groupId>org.pipservices3</groupId>
   <artifactId>pip-services3-messaging</artifactId>
-  <version>3.0.0</version>
+  <version>3.1.0</version>
 </dependency>
 ```
 
 ## Develop
 
 For development you shall install the following prerequisites:
-* Java SE Development Kit 8+
+* Java SE Development Kit 11+
 * Eclipse Java Photon or another IDE of your choice
 * Docker
 * Apache Maven

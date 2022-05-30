@@ -5,15 +5,15 @@ package org.pipservices3.messaging.queues;
  * If certain capability is not supported a queue will throw NotImplemented exception.
  */
 public class MessagingCapabilities {
-	private boolean _messageCount;
-	private boolean _send;
-	private boolean _receive;
-	private boolean _peek;
-	private boolean _peekBatch;
-	private boolean _renewLock;
-	private boolean _abandon;
-	private boolean _deadLetter;
-	private boolean _clear;
+	private final boolean _messageCount;
+	private final boolean _send;
+	private final boolean _receive;
+	private final boolean _peek;
+	private final boolean _peekBatch;
+	private final boolean _renewLock;
+	private final boolean _abandon;
+	private final boolean _deadLetter;
+	private final boolean _clear;
 
 	/**
 	 * Creates a new instance of the capabilities object.

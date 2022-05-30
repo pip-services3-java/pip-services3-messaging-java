@@ -280,7 +280,7 @@ long&nbsp;waitTimeout)</code></th>
 </tr>
 <tr class="row-color" id="i13">
 <td class="col-first"><code>void</code></td>
-<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#renewLock(org.pipservices3.messaging.queues.MessageEnvelop,long)">renewLock</a></span>&#8203;(<a href="MessageEnvelop.html" title="class in org.pipservices3.messaging.queues">MessageEnvelop</a>&nbsp;message,
+<th class="col-second" scope="row"><code><span class="member-name-link"><a href="#renewLock(org.pipservices3.messaging.queues.MessageEnvelope,long)">renewLock</a></span>&#8203;(<a href="MessageEnvelop.html" title="class in org.pipservices3.messaging.queues">MessageEnvelop</a>&nbsp;message,
 long&nbsp;lockTimeout)</code></th>
 <td class="col-last">
 <div class="block">Renews a lock on a message that makes it invisible from other receivers in
@@ -508,7 +508,7 @@ long&nbsp;waitTimeout)</span></div>
 </section>
 </li>
 <li>
-<section class="detail" id="renewLock(org.pipservices3.messaging.queues.MessageEnvelop,long)">
+<section class="detail" id="renewLock(org.pipservices3.messaging.queues.MessageEnvelope,long)">
 <h3>renewLock</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="member-name">renewLock</span>&#8203;(<span class="parameters"><a href="MessageEnvelop.html" title="class in org.pipservices3.messaging.queues">MessageEnvelop</a>&nbsp;message,
 long&nbsp;lockTimeout)</span></div>
@@ -516,9 +516,9 @@ long&nbsp;lockTimeout)</span></div>
  the queue. This method is usually used to extend the message processing time.</div>
 <dl class="notes">
 <dt>Specified by:</dt>
-<dd><code><a href="IMessageQueue.html#renewLock(org.pipservices3.messaging.queues.MessageEnvelop,long)">renewLock</a></code>&nbsp;in interface&nbsp;<code><a href="IMessageQueue.html" title="interface in org.pipservices3.messaging.queues">IMessageQueue</a></code></dd>
+<dd><code><a href="IMessageQueue.html#renewLock(org.pipservices3.messaging.queues.MessageEnvelope,long)">renewLock</a></code>&nbsp;in interface&nbsp;<code><a href="IMessageQueue.html" title="interface in org.pipservices3.messaging.queues">IMessageQueue</a></code></dd>
 <dt>Specified by:</dt>
-<dd><code><a href="MessageQueue.html#renewLock(org.pipservices3.messaging.queues.MessageEnvelop,long)">renewLock</a></code>&nbsp;in class&nbsp;<code><a href="MessageQueue.html" title="class in org.pipservices3.messaging.queues">MessageQueue</a></code></dd>
+<dd><code><a href="MessageQueue.html#renewLock(org.pipservices3.messaging.queues.MessageEnvelope,long)">renewLock</a></code>&nbsp;in class&nbsp;<code><a href="MessageQueue.html" title="class in org.pipservices3.messaging.queues">MessageQueue</a></code></dd>
 <dt>Parameters:</dt>
 <dd><code>message</code> - a message to extend its lock.</dd>
 <dd><code>lockTimeout</code> - a locking timeout in milliseconds.</dd>

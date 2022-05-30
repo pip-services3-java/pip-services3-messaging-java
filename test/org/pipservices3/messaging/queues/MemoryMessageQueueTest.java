@@ -5,63 +5,68 @@ import org.pipservices3.commons.errors.*;
 import org.pipservices3.messaging.queues.MemoryMessageQueue;
 
 public class MemoryMessageQueueTest {
-	private MemoryMessageQueue queue;
-	private MessageQueueFixture fixture;
-		
+    private final MemoryMessageQueue queue;
+    private final MessageQueueFixture fixture;
+
     public MemoryMessageQueueTest() throws ApplicationException {
-        queue = new MemoryMessageQueue("test");    	
+        queue = new MemoryMessageQueue("test");
         fixture = new MessageQueueFixture(queue);
     }
-    
-	@Before
-	public void setUp() throws Exception {
-		queue.clear(null);
-		queue.open(null);
-	}
 
-	@After
-	public void tearDown() throws Exception {
-		queue.close(null);
-	}
+    @Before
+    public void setUp() throws Exception {
+        queue.clear(null);
+        queue.open(null);
+    }
 
-	@Test
-	public void testSendReceiveMessage() throws Exception {
-		fixture.testSendReceiveMessage();
-	}
+    @After
+    public void tearDown() throws Exception {
+        queue.close(null);
+    }
 
-	@Test
-	public void testReceiveSendMessage() throws Exception {
-		fixture.testReceiveSendMessage();
-	}
+    @Test
+    public void testSendReceiveMessage() throws Exception {
+        fixture.testSendReceiveMessage();
+    }
 
-	@Test
-	public void testMoveToDeadMessage() throws Exception {
-		fixture.testMoveToDeadMessage();
-	}
+    @Test
+    public void testReceiveSendMessage() throws Exception {
+        fixture.testReceiveSendMessage();
+    }
 
-	@Test
-	public void testReceiveAndCompleteMessage() throws Exception {
-		fixture.testReceiveAndCompleteMessage();
-	}
+    @Test
+    public void testMoveToDeadMessage() throws Exception {
+        fixture.testMoveToDeadMessage();
+    }
 
-	@Test
-	public void testReceiveAndAbandonMessage() throws Exception {
-		fixture.testReceiveAndAbandonMessage();
-	}
+    @Test
+    public void testReceiveAndCompleteMessage() throws Exception {
+        fixture.testReceiveAndCompleteMessage();
+    }
 
-	@Test
-	public void testSendPeekMessage() throws Exception {
-		fixture.testSendPeekMessage();
-	}
+    @Test
+    public void testReceiveAndAbandonMessage() throws Exception {
+        fixture.testReceiveAndAbandonMessage();
+    }
 
-	@Test
-	public void testPeekNoMessage() throws Exception {
-		fixture.testPeekNoMessage();
-	}
+    @Test
+    public void testSendPeekMessage() throws Exception {
+        fixture.testSendPeekMessage();
+    }
 
-	@Test
-	public void testListen() throws Exception {
-		fixture.testListen();
-	}
-	
+    @Test
+    public void testPeekNoMessage() throws Exception {
+        fixture.testPeekNoMessage();
+    }
+
+    @Test
+    public void testOnMessage() throws Exception {
+        fixture.testOnMessage();
+    }
+
+    @Test
+    public void testListen() throws Exception {
+        fixture.testListen();
+    }
+
 }

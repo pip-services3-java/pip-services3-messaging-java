@@ -1,8 +1,10 @@
 package org.pipservices3.messaging.queues;
 
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import org.pipservices3.commons.config.ConfigParams;
 import org.pipservices3.components.auth.*;
 import org.pipservices3.components.connect.*;
 
@@ -26,411 +28,427 @@ import org.pipservices3.components.connect.*;
  * <pre>
  * {@code
  * MessageQueue queue = new MessageQueue("myqueue");
- * 
- * queue.send("123", new MessageEnvelop(null, "mymessage", "ABC"));
- * 
+ *
+ * queue.send("123", new MessageEnvelope(null, "mymessage", "ABC"));
+ *
  * queue.receive("123", 0);
  * }
  * </pre>
+ *
  * @see MessageQueue
  * @see MessagingCapabilities
  */
 public class MemoryMessageQueue extends MessageQueue {
-	private final long _defaultLockTimeout = 30000;
-	private final long _defaultWaitTimeout = 5000;
+    private List<MessageEnvelope> _messages = new ArrayList<MessageEnvelope>();
+    private int _lockTokenSequence = 0;
+    private Map<Integer, LockedMessage> _lockedMessages = new HashMap<Integer, LockedMessage>();
+    private boolean _opened = false;
 
-	private List<MessageEnvelop> _messages = new ArrayList<MessageEnvelop>();
-	private int _lockTokenSequence = 0;
-	private Map<Integer, LockedMessage> _lockedMessages = new HashMap<Integer, LockedMessage>();
-	private boolean _listening;
-	private boolean _opened = false;
+    /**
+     * Used to stop the listening process.
+     */
+    private boolean _cancel = false;
+    private long _listenInterval = 1000;
 
-	private class LockedMessage {
-		// public MessageEnvelop message;
-		public long lockExpiration;
-	}
 
-	/**
-	 * Creates a new instance of the message queue.
-	 */
-	public MemoryMessageQueue() {
-		this(null);
-	}
+    /**
+     * Creates a new instance of the message queue.
+     */
+    public MemoryMessageQueue() {
+        this(null);
+    }
 
-	/**
-	 * Creates a new instance of the message queue.
-	 * 
-	 * @param name (optional) a queue name.
-	 * 
-	 * @see MessagingCapabilities
-	 */
-	public MemoryMessageQueue(String name) {
-		super(name);
+    /**
+     * Creates a new instance of the message queue.
+     *
+     * @param name (optional) a queue name.
+     * @see MessagingCapabilities
+     */
+    public MemoryMessageQueue(String name) {
+        super(name);
 
-		_capabilities = new MessagingCapabilities(true, true, true, true, true, true, true, false, true);
-	}
+        _capabilities = new MessagingCapabilities(true, true, true, true, true, true, true, false, true);
+    }
 
-	/**
-	 * Checks if the component is opened.
-	 * 
-	 * @return true if the component has been opened and false otherwise.
-	 */
-	@Override
-	public boolean isOpen() {
-		return _opened;
-	}
+    /**
+     * Checks if the component is opened.
+     *
+     * @return true if the component has been opened and false otherwise.
+     */
+    @Override
+    public boolean isOpen() {
+        return _opened;
+    }
 
-	/**
-	 * Opens the component with given connection and credential parameters.
-	 * 
-	 * @param correlationId (optional) transaction id to trace execution through
-	 *                      call chain.
-	 * @param connection    connection parameters
-	 * @param credential    credential parameters
-	 */
-	@Override
-	public void open(String correlationId, ConnectionParams connection, CredentialParams credential) {
-		_logger.trace(correlationId, "Opened queue %s", this);
-		_opened = true;
-	}
+    /**
+     * Opens the component with given connection and credential parameters.
+     *
+     * @param correlationId (optional) transaction id to trace execution through
+     *                      call chain.
+     * @param connection    connection parameters
+     * @param credential    credential parameters
+     */
+    @Override
+    public void openWithParams(String correlationId, ConnectionParams connection, CredentialParams credential) {
+        _logger.trace(correlationId, "Opened queue %s", this);
+        _opened = true;
+    }
 
-	/**
-	 * Closes component and frees used resources.
-	 * 
-	 * @param correlationId (optional) transaction id to trace execution through
-	 *                      call chain.
-	 */
-	@Override
-	public void close(String correlationId) {
-		synchronized (_lock) {
-			_listening = false;
-			_opened = false;
-			_lock.notifyAll();
-		}
+    /**
+     * Closes component and frees used resources.
+     *
+     * @param correlationId (optional) transaction id to trace execution through
+     *                      call chain.
+     */
+    @Override
+    public void close(String correlationId) {
+        synchronized (_lock) {
+            _cancel = false;
+            _opened = false;
+            _lock.notifyAll();
+        }
 
-		_logger.trace(correlationId, "Closed queue %s", this);
-	}
+        _logger.trace(correlationId, "Closed queue %s", this);
+    }
 
-	/**
-	 * Clears component state.
-	 * 
-	 * @param correlationId (optional) transaction id to trace execution through
-	 *                      call chain.
-	 */
-	@Override
-	public void clear(String correlationId) {
-		synchronized (_lock) {
-			// Clear messages
-			_messages.clear();
-			_lockedMessages.clear();
-		}
+    /**
+     * Clears component state.
+     *
+     * @param correlationId (optional) transaction id to trace execution through
+     *                      call chain.
+     */
+    @Override
+    public void clear(String correlationId) {
+        synchronized (_lock) {
+            // Clear messages
+            _messages.clear();
+            _lockedMessages.clear();
+        }
 
-		_logger.trace(correlationId, "Cleared queue %s", this);
-	}
+        _logger.trace(correlationId, "Cleared queue %s", this);
+    }
 
-	/**
-	 * Gets the current number of messages in the queue to be delivered.
-	 * 
-	 * @return number of messages.
-	 */
-	@Override
-	public Long getMessageCount() {
-		synchronized (_lock) {
-			return (long) _messages.size();
-		}
-	}
+    @Override
+    public void configure(ConfigParams config) {
+        super.configure(config);
 
-	/**
-	 * Sends a message into the queue.
-	 * 
-	 * @param correlationId (optional) transaction id to trace execution through
-	 *                      call chain.
-	 * @param message       a message envelop to be sent.
-	 */
-	@Override
-	public void send(String correlationId, MessageEnvelop message) {
-		if (message == null)
-			return;
+        this._listenInterval = config.getAsLongWithDefault("listen_interval", this._listenInterval);
+        this._listenInterval = config.getAsLongWithDefault("options.listen_interval", this._listenInterval);
+    }
 
-		synchronized (_lock) {
-			// Set sent time
-			message.setSentTime(ZonedDateTime.now(ZoneOffset.UTC));
+    /**
+     * Gets the current number of messages in the queue to be delivered.
+     *
+     * @return number of messages.
+     */
+    @Override
+    public int readMessageCount() {
+        synchronized (_lock) {
+            return _messages.size();
+        }
+    }
 
-			// Add message to the queue
-			_messages.add(message);
+    /**
+     * Sends a message into the queue.
+     *
+     * @param correlationId (optional) transaction id to trace execution through
+     *                      call chain.
+     * @param message       a message envelop to be sent.
+     */
+    @Override
+    public void send(String correlationId, MessageEnvelope message) {
+        if (message == null)
+            return;
 
-			// Release threads waiting for messages
-			_lock.notify();
-		}
+        synchronized (_lock) {
+            // Set sent time
+            message.setSentTime(ZonedDateTime.now(ZoneOffset.UTC));
 
-		_counters.incrementOne("queue." + getName() + ".sent_messages");
-		_logger.debug(correlationId, "Sent message %s via %s", message, this);
-	}
+            // Add message to the queue
+            _messages.add(message);
 
-	/**
-	 * Peeks a single incoming message from the queue without removing it. If there
-	 * are no messages available in the queue it returns null.
-	 * 
-	 * @param correlationId (optional) transaction id to trace execution through
-	 *                      call chain.
-	 * @return a message envelop object.
-	 */
-	@Override
-	public MessageEnvelop peek(String correlationId) {
-		MessageEnvelop message = null;
+            // Release threads waiting for messages
+            _lock.notify();
+        }
 
-		synchronized (_lock) {
-			// Pick a message
-			if (_messages.size() > 0)
-				message = _messages.get(0);
-		}
+        _counters.incrementOne("queue." + getName() + ".sent_messages");
+        _logger.debug(correlationId, "Sent message %s via %s", message, this);
+    }
 
-		if (message != null)
-			_logger.trace(correlationId, "Peeked message %s on %s", message, this);
+    /**
+     * Peeks a single incoming message from the queue without removing it. If there
+     * are no messages available in the queue it returns null.
+     *
+     * @param correlationId (optional) transaction id to trace execution through
+     *                      call chain.
+     * @return a message envelop object.
+     */
+    @Override
+    public MessageEnvelope peek(String correlationId) {
+        MessageEnvelope message = null;
 
-		return message;
-	}
+        synchronized (_lock) {
+            // Pick a message
+            if (_messages.size() > 0)
+                message = _messages.get(0);
+        }
 
-	/**
-	 * Peeks multiple incoming messages from the queue without removing them. If
-	 * there are no messages available in the queue it returns an empty list.
-	 * 
-	 * @param correlationId (optional) transaction id to trace execution through
-	 *                      call chain.
-	 * @param messageCount  a maximum number of messages to peek.
-	 * @return a list with messages.
-	 */
-	@Override
-	public List<MessageEnvelop> peekBatch(String correlationId, int messageCount) {
-		List<MessageEnvelop> messages = new ArrayList<MessageEnvelop>();
+        if (message != null)
+            _logger.trace(correlationId, "Peeked message %s on %s", message, this);
 
-		synchronized (_lock) {
-			for (int index = 0; index < _messages.size() && index < messageCount; index++)
-				messages.add(_messages.get(index));
-		}
+        return message;
+    }
 
-		_logger.trace(correlationId, "Peeked %d messages on %s", messages.size(), this);
+    /**
+     * Peeks multiple incoming messages from the queue without removing them. If
+     * there are no messages available in the queue it returns an empty list.
+     *
+     * @param correlationId (optional) transaction id to trace execution through
+     *                      call chain.
+     * @param messageCount  a maximum number of messages to peek.
+     * @return a list with messages.
+     */
+    @Override
+    public List<MessageEnvelope> peekBatch(String correlationId, int messageCount) {
+        List<MessageEnvelope> messages = new ArrayList<MessageEnvelope>();
 
-		return messages;
-	}
+        synchronized (_lock) {
+            for (int index = 0; index < _messages.size() && index < messageCount; index++)
+                messages.add(_messages.get(index));
+        }
 
-	/**
-	 * Receives an incoming message and removes it from the queue.
-	 * 
-	 * @param correlationId (optional) transaction id to trace execution through
-	 *                      call chain.
-	 * @param waitTimeout   a timeout in milliseconds to wait for a message to come.
-	 * @return a message envelop object.
-	 */
-	@Override
-	public MessageEnvelop receive(String correlationId, long waitTimeout) {
-		MessageEnvelop message = null;
+        _logger.trace(correlationId, "Peeked %d messages on %s", messages.size(), this);
 
-		synchronized (_lock) {
-			// Try to get a message
-			if (_messages.size() > 0) {
-				message = _messages.get(0);
-				_messages.remove(0);
-			}
+        return messages;
+    }
 
-			if (message == null) {
-				try {
-					_lock.wait(waitTimeout);
-				} catch (InterruptedException ex) {
-					return null;
-				}
-			}
+    /**
+     * Receives an incoming message and removes it from the queue.
+     *
+     * @param correlationId (optional) transaction id to trace execution through
+     *                      call chain.
+     * @param waitTimeout   a timeout in milliseconds to wait for a message to come.
+     * @return a message envelop object.
+     */
+    @Override
+    public MessageEnvelope receive(String correlationId, long waitTimeout) {
+        MessageEnvelope message = null;
+        long checkIntervalMs = 100;
+        long elapsedTime = 0;
 
-			// Try to get a message again
-			if (message == null && _messages.size() > 0) {
-				message = _messages.get(0);
-				_messages.remove(0);
-			}
+        synchronized (_lock) {
+            // Get message the the queue
+            if (_messages.size() > 0) {
+                message = _messages.get(0);
+                _messages.remove(0);
+            }
+        }
 
-			// Exit if message was not found
-			if (message == null)
-				return null;
+        while (elapsedTime < waitTimeout && message == null) {
+            synchronized (_lock) {
+                if (message == null) {
+                    try {
+                        // Wait for a while
+                        _lock.wait(checkIntervalMs);
+                    } catch (InterruptedException ex) {
+                        return null;
+                    }
+                }
 
-			// Generate and set locked token
-			int lockedToken = _lockTokenSequence++;
-			message.setReference(lockedToken);
+                // Try to get a message again
+                if (message == null && _messages.size() > 0) {
+                    message = _messages.get(0);
+                    _messages.remove(0);
+                }
+            }
+        }
 
-			// Add messages to locked messages list
-			LockedMessage lockedMessage = new LockedMessage();
-			lockedMessage.lockExpiration = System.currentTimeMillis() + _defaultLockTimeout;
-			// lockedMessage.message = message;
+        // Exit if message was not found
+        if (message == null)
+            return null;
 
-			_lockedMessages.put(lockedToken, lockedMessage);
-		}
+        // Generate and set locked token
+        int lockedToken = _lockTokenSequence++;
+        message.setReference(lockedToken);
 
-		_counters.incrementOne("queue." + getName() + ".received_messages");
-		_logger.debug(message.getCorrelationId(), "Received message %s via %s", message, this);
+        // Add messages to locked messages list
+        LockedMessage lockedMessage = new LockedMessage();
+        lockedMessage.expirationTime = ZonedDateTime.now().plus(waitTimeout, ChronoUnit.MILLIS);
+        lockedMessage.message = message;
+        lockedMessage.timeout = waitTimeout;
 
-		return message;
-	}
+        _lockedMessages.put(lockedToken, lockedMessage);
 
-	/**
-	 * Renews a lock on a message that makes it invisible from other receivers in
-	 * the queue. This method is usually used to extend the message processing time.
-	 * 
-	 * @param message     a message to extend its lock.
-	 * @param lockTimeout a locking timeout in milliseconds.
-	 */
-	@Override
-	public void renewLock(MessageEnvelop message, long lockTimeout) {
-		if (message == null || message.getReference() == null)
-			return;
 
-		synchronized (_lock) {
-			// Get message from locked queue
-			int lockedToken = (int) message.getReference();
-			LockedMessage lockedMessage = _lockedMessages.get(lockedToken);
+        _counters.incrementOne("queue." + getName() + ".received_messages");
+        _logger.debug(message.getCorrelationId(), "Received message %s via %s", message, this);
 
-			// If lock is found, extend the lock
-			if (lockedMessage != null)
-				lockedMessage.lockExpiration = System.currentTimeMillis() + lockTimeout;
-		}
+        return message;
+    }
 
-		_logger.trace(message.getCorrelationId(), "Renewed lock for message %s at %s", message, this);
-	}
+    /**
+     * Renews a lock on a message that makes it invisible from other receivers in
+     * the queue. This method is usually used to extend the message processing time.
+     *
+     * @param message     a message to extend its lock.
+     * @param lockTimeout a locking timeout in milliseconds.
+     */
+    @Override
+    public void renewLock(MessageEnvelope message, long lockTimeout) {
+        if (message == null || message.getReference() == null)
+            return;
 
-	/**
-	 * Returnes message into the queue and makes it available for all subscribers to
-	 * receive it again. This method is usually used to return a message which could
-	 * not be processed at the moment to repeat the attempt. Messages that cause
-	 * unrecoverable errors shall be removed permanently or/and send to dead letter
-	 * queue.
-	 * 
-	 * @param message a message to return.
-	 */
-	@Override
-	public void abandon(MessageEnvelop message) {
-		if (message == null || message.getReference() == null)
-			return;
+        synchronized (_lock) {
+            // Get message from locked queue
+            int lockedToken = (int) message.getReference();
+            LockedMessage lockedMessage = _lockedMessages.get(lockedToken);
 
-		synchronized (_lock) {
-			// Get message from locked queue
-			int lockedToken = (int) message.getReference();
-			LockedMessage lockedMessage = _lockedMessages.get(lockedToken);
-			if (lockedMessage != null) {
-				// Remove from locked messages
-				_lockedMessages.remove(lockedToken);
-				message.setReference(null);
+            // If lock is found, extend the lock
+            if (lockedMessage != null)
+                lockedMessage.expirationTime = ZonedDateTime.now().plus(lockTimeout, ChronoUnit.MILLIS);
+        }
 
-				// Skip if it is already expired
-				if (lockedMessage.lockExpiration <= System.currentTimeMillis())
-					return;
-			}
-			// Skip if it absent
-			else
-				return;
-		}
+        _logger.trace(message.getCorrelationId(), "Renewed lock for message %s at %s", message, this);
+    }
 
-		_logger.trace(message.getCorrelationId(), "Abandoned message %s at %s", message, this);
+    /**
+     * Returnes message into the queue and makes it available for all subscribers to
+     * receive it again. This method is usually used to return a message which could
+     * not be processed at the moment to repeat the attempt. Messages that cause
+     * unrecoverable errors shall be removed permanently or/and send to dead letter
+     * queue.
+     *
+     * @param message a message to return.
+     */
+    @Override
+    public void abandon(MessageEnvelope message) {
+        if (message == null || message.getReference() == null)
+            return;
 
-		// Add back to the queue
-		send(message.getCorrelationId(), message);
-	}
+        synchronized (_lock) {
+            // Get message from locked queue
+            int lockedToken = (int) message.getReference();
+            LockedMessage lockedMessage = _lockedMessages.get(lockedToken);
+            if (lockedMessage != null) {
+                // Remove from locked messages
+                _lockedMessages.remove(lockedToken);
+                message.setReference(null);
 
-	/**
-	 * Permanently removes a message from the queue. This method is usually used to
-	 * remove the message after successful processing.
-	 * 
-	 * @param message a message to remove.
-	 */
-	@Override
-	public void complete(MessageEnvelop message) {
-		if (message == null || message.getReference() == null)
-			return;
+                // Skip if it is already expired
+                if (lockedMessage.expirationTime.toInstant().toEpochMilli() <= ZonedDateTime.now().toInstant().toEpochMilli())
+                    return;
+            }
+            // Skip if it absent
+            else
+                return;
+        }
 
-		synchronized (_lock) {
-			int lockKey = (int) message.getReference();
-			_lockedMessages.remove(lockKey);
-			message.setReference(null);
-		}
+        _logger.trace(message.getCorrelationId(), "Abandoned message %s at %s", message, this);
 
-		_logger.trace(message.getCorrelationId(), "Completed message %s at %s", message, this);
-	}
+        // Add back to the queue
+        send(message.getCorrelationId(), message);
+    }
 
-	/**
-	 * Permanently removes a message from the queue and sends it to dead letter
-	 * queue.
-	 * 
-	 * @param message a message to be removed.
-	 */
-	@Override
-	public void moveToDeadLetter(MessageEnvelop message) {
-		if (message == null || message.getReference() == null)
-			return;
+    /**
+     * Permanently removes a message from the queue. This method is usually used to
+     * remove the message after successful processing.
+     *
+     * @param message a message to remove.
+     */
+    @Override
+    public void complete(MessageEnvelope message) {
+        if (message == null || message.getReference() == null)
+            return;
 
-		synchronized (_lock) {
-			int lockKey = (int) message.getReference();
-			_lockedMessages.remove(lockKey);
-			message.setReference(null);
-		}
+        synchronized (_lock) {
+            int lockKey = (int) message.getReference();
+            _lockedMessages.remove(lockKey);
+            message.setReference(null);
+        }
 
-		_counters.incrementOne("queue." + getName() + ".dead_messages");
-		_logger.trace(message.getCorrelationId(), "Moved to dead message %s at %s", message, this);
-	}
+        _logger.trace(message.getCorrelationId(), "Completed message %s at %s", message, this);
+    }
 
-	/**
-	 * Listens for incoming messages and blocks the current thread until queue is
-	 * closed.
-	 * 
-	 * @param correlationId (optional) transaction id to trace execution through
-	 *                      call chain.
-	 * @param receiver      a receiver to receive incoming messages.
-	 * 
-	 * @see IMessageReceiver
-	 * @see #receive(String, long)
-	 */
-	@Override
-	public void listen(String correlationId, IMessageReceiver receiver) {
-		if (_listening) {
-			_logger.error(correlationId, "Already listening queue %s", this);
-			return;
-		}
+    /**
+     * Permanently removes a message from the queue and sends it to dead letter
+     * queue.
+     *
+     * @param message a message to be removed.
+     */
+    @Override
+    public void moveToDeadLetter(MessageEnvelope message) {
+        if (message == null || message.getReference() == null)
+            return;
 
-		_logger.trace(correlationId, "Started listening messages at %s", this);
+        synchronized (_lock) {
+            int lockKey = (int) message.getReference();
+            _lockedMessages.remove(lockKey);
+            message.setReference(null);
+        }
 
-		_listening = true;
+        _counters.incrementOne("queue." + getName() + ".dead_messages");
+        _logger.trace(message.getCorrelationId(), "Moved to dead message %s at %s", message, this);
+    }
 
-		while (_listening) {
-			MessageEnvelop message = receive(correlationId, _defaultWaitTimeout);
+    /**
+     * Listens for incoming messages and blocks the current thread until queue is
+     * closed.
+     *
+     * @param correlationId (optional) transaction id to trace execution through
+     *                      call chain.
+     * @param receiver      a receiver to receive incoming messages.
+     * @see IMessageReceiver
+     * @see #receive(String, long)
+     */
+    @Override
+    public void listen(String correlationId, IMessageReceiver receiver) {
+        if (_cancel) {
+            _logger.error(correlationId, "Already listening queue %s", this);
+            return;
+        }
 
-			if (_listening && message != null) {
-				try {
-					receiver.receiveMessage(message, this);
-				} catch (Exception ex) {
-					_logger.error(correlationId, ex, "Failed to process the message");
-					// await AbandonAsync(message);
-				}
-			}
-		}
+        _logger.trace(correlationId, "Started listening messages at %s", this);
 
-		_logger.trace(correlationId, "Stopped listening messages at %s", this);
-	}
+        _cancel = true;
 
-	/**
-	 * Ends listening for incoming messages. When this method is call listen()
-	 * unblocks the thread and execution continues.
-	 * 
-	 * @param correlationId (optional) transaction id to trace execution through
-	 *                      call chain.
-	 */
-	@Override
-	public void endListen(String correlationId) {
-		_listening = false;
-	}
+        while (_cancel) {
+            MessageEnvelope message = receive(correlationId, _listenInterval);
 
-	/**
-	 * Override toString() method, string representation of queue.
-	 * 
-	 * @return queue name
-	 */
-	@Override
-	public String toString() {
-		return "[" + getName() + "]";
-	}
+            if (_cancel && message != null) {
+                try {
+                    receiver.receiveMessage(message, this);
+                } catch (Exception ex) {
+                    _logger.error(correlationId, ex, "Failed to process the message");
+                    // await AbandonAsync(message);
+                }
+            }
+        }
+
+        _logger.trace(correlationId, "Stopped listening messages at %s", this);
+    }
+
+    /**
+     * Ends listening for incoming messages. When this method is call listen()
+     * unblocks the thread and execution continues.
+     *
+     * @param correlationId (optional) transaction id to trace execution through
+     *                      call chain.
+     */
+    @Override
+    public void endListen(String correlationId) {
+        synchronized (_lock) {
+            _cancel = false;
+        }
+    }
+
+    /**
+     * Override toString() method, string representation of queue.
+     *
+     * @return queue name
+     */
+    @Override
+    public String toString() {
+        return "[" + getName() + "]";
+    }
 
 }

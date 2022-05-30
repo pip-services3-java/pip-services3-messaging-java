@@ -5,23 +5,25 @@ import org.pipservices3.messaging.queues.MemoryMessageQueue;
 import org.pipservices3.commons.refer.*;
 
 /**
- * Creates MemoryMessageQueue components by their descriptors.
+ * Creates {@link MemoryMessageQueue} components by their descriptors.
  * Name of created message queue is taken from its descriptor.
- * 
+ *
  * @see <a href="https://pip-services3-java.github.io/pip-services3-components-java/org/pipservices3/components/build/Factory.html">Factory</a>
  * @see MemoryMessageQueue
  */
 public class DefaultMessagingFactory extends Factory {
 
-	public static Descriptor Descriptor = new Descriptor("pip-services3", "factory", "messaging", "default", "1.0");
-    public static Descriptor MemoryMessageQueueFactoryDescriptor = new Descriptor("pip-services3", "factory", "message-queue", "memory", "1.0");
-    public static Descriptor MemoryMessageQueueDescriptor = new Descriptor("pip-services3", "message-queue", "memory", "*", "1.0");
+    private static final Descriptor MemoryQueueDescriptor = new Descriptor("pip-services", "message-queue", "memory", "*", "1.0");
+    private static final Descriptor MemoryQueueFactoryDescriptor = new Descriptor("pip-services", "queue-factory", "memory", "*", "1.0");
 
     /**
-	 * Create a new instance of the factory.
-	 */
+     * Create a new instance of the factory.
+     */
     public DefaultMessagingFactory() {
-        registerAsType(MemoryMessageQueueFactoryDescriptor, MemoryMessageQueueFactory.class);
-        registerAsType(MemoryMessageQueueDescriptor, MemoryMessageQueue.class);
+        registerAsType(MemoryQueueFactoryDescriptor, MemoryMessageQueueFactory.class);
+        register(MemoryQueueDescriptor, (locator) -> {
+            Descriptor descriptor = (Descriptor) locator;
+            return new MemoryMessageQueue(descriptor.getName());
+        });
     }
 }
