@@ -1,17 +1,23 @@
 package org.pipservices3.messaging.queues;
 
-import java.util.*;
-
-import org.pipservices3.commons.config.*;
-import org.pipservices3.commons.errors.*;
-import org.pipservices3.commons.refer.*;
-import org.pipservices3.commons.run.*;
+import org.pipservices3.commons.config.ConfigParams;
+import org.pipservices3.commons.config.IConfigurable;
+import org.pipservices3.commons.config.NameResolver;
+import org.pipservices3.commons.errors.ApplicationException;
+import org.pipservices3.commons.errors.InvalidStateException;
+import org.pipservices3.commons.refer.IReferenceable;
+import org.pipservices3.commons.refer.IReferences;
+import org.pipservices3.commons.refer.ReferenceException;
+import org.pipservices3.commons.run.IClosable;
+import org.pipservices3.commons.run.IOpenable;
 import org.pipservices3.components.auth.CredentialParams;
 import org.pipservices3.components.auth.CredentialResolver;
 import org.pipservices3.components.connect.ConnectionParams;
 import org.pipservices3.components.connect.ConnectionResolver;
 import org.pipservices3.components.count.CompositeCounters;
 import org.pipservices3.components.log.CompositeLogger;
+
+import java.util.List;
 
 /**
  * Abstract message queue that is used as a basis for specific message queue implementations.
@@ -51,7 +57,7 @@ public abstract class MessageQueue implements IMessageQueue, IReferenceable, ICo
     protected String _kind;
     protected MessagingCapabilities _capabilities = new MessagingCapabilities(true, true, true, true, true, true, true,
             false, true);
-    ;
+
     protected final Object _lock = new Object();
     protected CompositeLogger _logger = new CompositeLogger();
     protected CompositeCounters _counters = new CompositeCounters();

@@ -50,7 +50,7 @@ public abstract class CachedMessageQueue extends MessageQueue implements ICleana
      * @param correlationId (optional) transaction id to trace execution through call chain.
      */
     @Override
-    public void open(String correlationId) throws ApplicationException {
+    public void open(String correlationId) {
         if (this.isOpen())
             return;
 
@@ -189,7 +189,7 @@ public abstract class CachedMessageQueue extends MessageQueue implements ICleana
      * @return a received message or <code>null</code>.
      */
     public MessageEnvelope receive(String correlationId, long waitTimeout) throws InvalidStateException {
-        MessageEnvelope message = null;
+        MessageEnvelope message;
         this.checkOpen(correlationId);
 
         // Subscribe to topic if needed

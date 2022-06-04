@@ -1,9 +1,10 @@
 package org.pipservices3.messaging.build;
 
 
+import org.pipservices3.commons.refer.Descriptor;
+import org.pipservices3.commons.refer.ReferenceException;
 import org.pipservices3.messaging.queues.IMessageQueue;
 import org.pipservices3.messaging.queues.MemoryMessageQueue;
-import org.pipservices3.commons.refer.*;
 
 /**
  * Creates {@link MemoryMessageQueue} components by their descriptors.

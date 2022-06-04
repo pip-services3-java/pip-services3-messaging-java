@@ -1,9 +1,9 @@
 package org.pipservices3.messaging.queues;
 
-import java.util.*;
-
 import org.pipservices3.commons.errors.ApplicationException;
-import org.pipservices3.commons.run.*;
+import org.pipservices3.commons.run.IOpenable;
+
+import java.util.List;
 
 /**
  * Interface for asynchronous message queues.

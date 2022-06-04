@@ -1,12 +1,16 @@
 package org.pipservices3.messaging.queues;
 
-import java.time.*;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-
 import org.pipservices3.commons.config.ConfigParams;
-import org.pipservices3.components.auth.*;
-import org.pipservices3.components.connect.*;
+import org.pipservices3.components.auth.CredentialParams;
+import org.pipservices3.components.connect.ConnectionParams;
+
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Message queue that sends and receives messages within the same process by using shared memory.
@@ -39,9 +43,9 @@ import org.pipservices3.components.connect.*;
  * @see MessagingCapabilities
  */
 public class MemoryMessageQueue extends MessageQueue {
-    private List<MessageEnvelope> _messages = new ArrayList<MessageEnvelope>();
+    private final List<MessageEnvelope> _messages = new ArrayList<>();
     private int _lockTokenSequence = 0;
-    private Map<Integer, LockedMessage> _lockedMessages = new HashMap<Integer, LockedMessage>();
+    private final Map<Integer, LockedMessage> _lockedMessages = new HashMap<>();
     private boolean _opened = false;
 
     /**
@@ -210,7 +214,7 @@ public class MemoryMessageQueue extends MessageQueue {
      */
     @Override
     public List<MessageEnvelope> peekBatch(String correlationId, int messageCount) {
-        List<MessageEnvelope> messages = new ArrayList<MessageEnvelope>();
+        List<MessageEnvelope> messages = new ArrayList<>();
 
         synchronized (_lock) {
             for (int index = 0; index < _messages.size() && index < messageCount; index++)
@@ -254,7 +258,7 @@ public class MemoryMessageQueue extends MessageQueue {
                         return null;
                     }
                 }
-
+            
                 // Try to get a message again
                 if (message == null && _messages.size() > 0) {
                     message = _messages.get(0);

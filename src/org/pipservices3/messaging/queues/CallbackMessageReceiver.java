@@ -1,7 +1,5 @@
 package org.pipservices3.messaging.queues;
 
-import java.util.function.Function;
-
 /**
  * Wraps message callback into IMessageReceiver
  */

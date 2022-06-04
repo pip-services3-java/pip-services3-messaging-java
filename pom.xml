@@ -4,7 +4,7 @@
 
     <groupId>org.pipservices</groupId>
     <artifactId>pip-services3-messaging</artifactId>
-    <version>3.1.0</version>
+    <version>3.1.1</version>
     <packaging>jar</packaging>
 
     <name>Pip.Services Messaging</name>
@@ -48,8 +48,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>12</maven.compiler.source>
-        <maven.compiler.target>12</maven.compiler.target>
+        <maven.compiler.source>18</maven.compiler.source>
+        <maven.compiler.target>18</maven.compiler.target>
         <minimal.pipversion>3.0.1</minimal.pipversion>
     </properties>
 

@@ -1,18 +1,15 @@
 package org.pipservices3.messaging.queues;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
-import java.util.Map;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.pipservices3.commons.convert.JsonConverter;
 import org.pipservices3.commons.convert.StringConverter;
-import org.pipservices3.commons.data.*;
+import org.pipservices3.commons.data.IdGenerator;
 
-import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.Map;
 
 /**
  * Allows adding additional information to messages. A correlation id, message id, and a message type
