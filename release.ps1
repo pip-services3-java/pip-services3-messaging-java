@@ -15,6 +15,8 @@ Write-Host "Java version"
 java -version
 Write-Host "mvn version"
 mvn -version
+Write-Host "gpg version"
+gpg --version
 
 # Verify release existence on nexus repository
 $mvnPackageUrl = "https://oss.sonatype.org/service/local/repositories/releases/content/org/pipservices/$($component.name)/$($component.version)/$($component.name)-$($component.version).jar"
@@ -99,6 +101,9 @@ if (-not (Test-Path "~/.m2/settings.xml")) {
    Set-Content -Path "~/.m2/settings.xml" -Value $m2SetingsContent
    Write-Host "'~/.m2/settings.xml' created"
 }
+
+Write-Host "Get gpg keys"
+gpg --list-keys
 
 # Deploy release to staging repository
 mvn clean deploy
