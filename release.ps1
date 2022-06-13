@@ -102,8 +102,12 @@ if (-not (Test-Path "~/.m2/settings.xml")) {
    Write-Host "'~/.m2/settings.xml' created"
 }
 
+systemctl --user status gpg-agent
+systemctl --user stop gpg-agent
+systemctl --user start gpg-agent
+
 # Deploy release to staging repository
-mvn clean deploy -X
+mvn clean deploy
 
 # Verify mvn deploy result
 if ($LastExitCode -ne 0) {
