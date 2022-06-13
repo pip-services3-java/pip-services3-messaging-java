@@ -102,11 +102,8 @@ if (-not (Test-Path "~/.m2/settings.xml")) {
    Write-Host "'~/.m2/settings.xml' created"
 }
 
-Write-Host "Get gpg keys"
-gpg --list-keys
-
 # Deploy release to staging repository
-mvn clean deploy
+mvn clean deploy -X
 
 # Verify mvn deploy result
 if ($LastExitCode -ne 0) {
