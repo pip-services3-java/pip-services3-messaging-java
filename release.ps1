@@ -39,13 +39,14 @@ if (($env:GPG_PUBLIC_KEY -ne $null) -and ($env:GPG_PRIVATE_KEY -ne $null)) {
    Set-Content -Path "gpg_public.key" -Value $env:GPG_PUBLIC_KEY
    Set-Content -Path "gpg_private.key" -Value $env:GPG_PRIVATE_KEY
 
-   Write-Host "Before import"
-   gpg --list-keys
+   # Write-Host "Before import"
+   # gpg --list-keys
    gpg --import "gpg_public.key"
    gpg --batch --passphrase "$($env:GPG_PASSPHRASE)" --import "gpg_private.key"
    Write-Host "After import"
    gpg --list-keys
    $env:GPG_TTY=$(tty)
+   gpg-agent --daemon
 
    # Remove m2 config for clean run
    if (Test-Path "~/.m2/settings.xml") {
