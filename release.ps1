@@ -102,6 +102,8 @@ if (-not (Test-Path "~/.m2/settings.xml")) {
    Write-Host "'~/.m2/settings.xml' created"
 }
 
+$env:XDG_RUNTIME_DIR = "/run/user/$UID"
+$env:DBUS_SESSION_BUS_ADDRESS = "unix:path=${XDG_RUNTIME_DIR}/bus"
 systemctl --user status gpg-agent
 systemctl --user stop gpg-agent
 systemctl --user start gpg-agent
