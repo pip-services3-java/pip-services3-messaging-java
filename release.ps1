@@ -11,6 +11,11 @@ if ($component.version -ne $version) {
     throw "Versions in component.json and pom.xml do not match"
 }
 
+Write-Host "Java version"
+java -version
+Write-Host "mvn version"
+mvn -version
+
 # Verify release existence on nexus repository
 $mvnPackageUrl = "https://oss.sonatype.org/service/local/repositories/releases/content/org/pipservices/$($component.name)/$($component.version)/$($component.name)-$($component.version).jar"
 try {
